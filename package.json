@@ -1,0 +1,21 @@
+{
+  "name": "Bernie",
+  "version": "0.1.0",
+  "description": "node.js-based mtgox bitcoin ticker",
+  "main": "index.js",
+  "engines": { "node": ">= 0.6.0" },
+  "scripts": { "test": "mocha --recursive test" },
+  "repository": {
+    "type": "git",
+    "url": "@repository-url"
+  },
+  "dependencies": { "underscore": "1.4.4" },
+  "devDependencies": {
+    "mocha": "*",
+    "should": "1.2.2",
+    "util": "0.4.9"
+  },
+  "author": "@codeswimmer",
+  "license": "MIT"
+}
+
