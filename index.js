@@ -7,7 +7,8 @@ var accounting = require('accounting')
   , MtGox = require('mtgox')
   , ElapsedTime = require('./lib/verdoux/elapsedTime.js')
   , GameLoop = require('./lib/verdoux/gameloop.js')
-  , PubSub = require('./lib/verdoux/pubsub.js');
+  , PubSub = require('./lib/verdoux/pubsub.js')
+  , Task = require('./lib/koufax/task.js');
 
 function Bernie(options) {
   var that = PubSub.create();
@@ -32,18 +33,57 @@ function Drone() {
 
   that.performWork = function(){
     if (notExisty(oneSecondTimer))  {
-      oneSecondTimer = setInterval(task, 10 * 1000);
-      task();
+      /*
+      oneSecondTimer = setInterval(retrieveMarketData, 10 * 1000);
+      retrieveMarketData();
+      */
+      if (notExisty(retrieveMarketDataTask)) {
+        retrieveMarketDataTask = Task.create('market', retrieveMarketData);
+        retrieveMarketDataTask.on(Task.Events.Done, onMarketDone);
+        retrieveMarketDataTask.on(Task.Events.MarkedCompleted, onMarketCompleted);
+      }
+      
+      oneSecondTimer = setInterval(onTrigger, 10 * 1000);
+      onTrigger();
     }
   };
 
-  function task() {
+  function onTrigger() {
+    if (retrieveMarketDataTask.isReady()) {
+      retrieveMarketDataTask.begin();
+    }
+  };
+
+  function onMarketDone(result) {
+    logResult({market:result.value.market}, result.value.timestamp);
+    retrieveMarketDataTask.markCompleted();
+  };
+
+  function onMarketCompleted() {
+    retrieveMarketDataTask.reset();
+  };
+
+  function retrieveMarketData(done) {
     var timestamp = Date.now();
     gox.market('BTCUSD', function(err, market) {
-      logResult({market:market}, timestamp);
+      done({market:market, timestamp:timestamp});
       previousLast = market.last;
     });
-  }
+  };
+
+  function retrieveDepthData(done) {
+    var timestamp = Date.now();
+    gox.depth('BTCUSD', function(err, depth) {
+      done(depth);
+    });
+  };
+
+  function onDepthDone(result) {
+    console.log('#' + result.task.name + ': ' + util.inspect(result.value.bids.length));
+    retrieveDepthDataTask.markCompleted();
+  };
+
+  function onDepthCompleted() {retrieveDepthDataTask.reset();};
 
   function logResult(result, timestamp) {
     var market = result.market;
@@ -54,19 +94,22 @@ function Drone() {
     var positionDelta = position - originalPosition;
     var positionDeltaPercent = (positionDelta / originalPosition) * 100;
 
-
     if (delta !== 0) {
-      var message = new Date().toString() + ' in ' + elapsed + 'ms';
-      message += ' : ' + market.last;
+      var message = new Date().toString() + '(' + elapsed + 'ms)';
+      message += ' : ' + accounting.formatNumber(market.last, 4);
+      message += ' [' + accounting.formatNumber(market.volume, 2, '') + ']';
 
       if (existy(previousLast)) {
-        var deltaPercent = (delta / market.last);
-        message += '\t(' + accounting.formatNumber(deltaPercent, 2) + '%)';
+        var deltaPercent = (delta / market.last) * 100;
+        message += '\t[' + accounting.formatNumber(position, 4, '') + ']';
+        if (deltaPercent >= 0) {message += '(+';}
+        else {message += '('}
+        message += accounting.formatNumber(deltaPercent, 2) + '%)\t';
       }
       else {
-        message += '\t';
+        message += '\t[' + accounting.formatNumber(position, 4, '') + ']';
+        message += '[' + accounting.formatNumber(originalPosition, 4, '') + ']';
       }
-      message += '\t[' + accounting.formatNumber(position, 4, '') + ']';
       if (positionDeltaPercent > 0) {message += '+';}
       message += '\t(' + accounting.formatNumber(positionDeltaPercent, 2) + '%)';
       console.log(message);
@@ -78,7 +121,8 @@ function Drone() {
     , gox = new MtGox()
     , oneSecondTimer = null
     , originalPosition = (btc * originalPrice)
-    , previousLast = null;
+    , previousLast = null
+    , retrieveMarketDataTask;
 
   return that;
 }
