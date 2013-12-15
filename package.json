@@ -9,7 +9,11 @@
     "type": "git",
     "url": "@repository-url"
   },
-  "dependencies": { "underscore": "1.4.4" },
+  "dependencies": { 
+    "accounting": "0.3.2",
+    "mtgox": "1.0.1",
+    "underscore": "1.4.4" 
+  },
   "devDependencies": {
     "mocha": "*",
     "should": "1.2.2",
