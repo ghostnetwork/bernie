@@ -104,14 +104,15 @@ function Drone() {
         message += '\t[' + accounting.formatNumber(position, 4, '') + ']';
         if (deltaPercent >= 0) {message += '(+';}
         else {message += '('}
-        message += accounting.formatNumber(deltaPercent, 2) + '%)\t';
+        message += accounting.formatNumber(deltaPercent, 4) + '%)\t';
       }
       else {
         message += '\t[' + accounting.formatNumber(position, 4, '') + ']';
         message += '[' + accounting.formatNumber(originalPosition, 4, '') + ']';
       }
-      if (positionDeltaPercent > 0) {message += '+';}
-      message += '\t(' + accounting.formatNumber(positionDeltaPercent, 2) + '%)';
+      if (positionDeltaPercent > 0) {message += '\t(+';}
+      else {message += '\t('}
+      message += accounting.formatNumber(positionDeltaPercent, 2) + '%)';
       console.log(message);
     }
   }
