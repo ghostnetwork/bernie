@@ -125,16 +125,21 @@ function Drone() {
     var utcSecs = now.getUTCSeconds();
     var utcMillis = now.getUTCMilliseconds();
     
-    //Mon Dec 16 2013 08:02:36
     var day = dayToShortString(utcDay);
     var month = monthToShortString(utcMonth);
-    var result = day + ' ' + month + ' ' + utcDate + ' ' + utcYear + ' ' 
-               + utcHours + ':' + utcMins + ':' + utcSecs + ':' + utcMillis;
+    var result = day + ' ' 
+               + month + ' ' 
+               + padWithZeros(utcDate, 2) + ' ' 
+               + utcYear + ' ' 
+               + padWithZeros(utcHours, 2) + ':' 
+               + padWithZeros(utcMins, 2) + ':' 
+               + padWithZeros(utcSecs, 2) + ':' 
+               + padWithZeros(utcMillis, 3);
     return result;
   }
 
-  var btc = 357.6231//331.0578
-    , originalPrice = 848.975//912.575
+  var btc = 433.9229//415.3280//331.0578
+    , originalPrice = $727.00//731.02//917.10
     , gox = new MtGox()
     , oneSecondTimer = null
     , originalPosition = (btc * originalPrice)
