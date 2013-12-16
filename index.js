@@ -1,6 +1,7 @@
 'use strict';
 
 require('./lib/verdoux/predicates.js');
+require('./lib/verdoux/dateTimeTools.js');
 var accounting = require('accounting')
   , _ = require('underscore')
   , util = require('util')
@@ -33,22 +34,17 @@ function Drone() {
 
   that.performWork = function(){
     if (notExisty(oneSecondTimer))  {
-      /*
-      oneSecondTimer = setInterval(retrieveMarketData, 10 * 1000);
-      retrieveMarketData();
-      */
       if (notExisty(retrieveMarketDataTask)) {
         retrieveMarketDataTask = Task.create('market', retrieveMarketData);
         retrieveMarketDataTask.on(Task.Events.Done, onMarketDone);
         retrieveMarketDataTask.on(Task.Events.MarkedCompleted, onMarketCompleted);
       }
-      
-      oneSecondTimer = setInterval(onTrigger, 10 * 1000);
-      onTrigger();
+      oneSecondTimer = setInterval(onTimerTrigger, 10 * 1000);
+      onTimerTrigger();
     }
   };
 
-  function onTrigger() {
+  function onTimerTrigger() {
     if (retrieveMarketDataTask.isReady()) {
       retrieveMarketDataTask.begin();
     }
@@ -95,7 +91,8 @@ function Drone() {
     var positionDeltaPercent = (positionDelta / originalPosition) * 100;
 
     if (delta !== 0) {
-      var message = new Date().toString() + '(' + elapsed + 'ms)';
+      var dateString = rightNowUTCToString();
+      var message = dateString + ' (' + elapsed + 'ms)';
       message += ' : ' + accounting.formatNumber(market.last, 4);
       message += ' [' + accounting.formatNumber(market.volume, 2, '') + ']';
 
@@ -117,8 +114,27 @@ function Drone() {
     }
   }
 
-  var btc = 331.0578
-    , originalPrice = 912.575
+  function rightNowUTCToString() {
+    var now = new Date();
+    var utcDay = now.getUTCDay();
+    var utcMonth = now.getUTCMonth();
+    var utcDate = now.getUTCDate();
+    var utcYear = now.getFullYear();
+    var utcHours = now.getUTCHours();
+    var utcMins = now.getUTCMinutes();
+    var utcSecs = now.getUTCSeconds();
+    var utcMillis = now.getUTCMilliseconds();
+    
+    //Mon Dec 16 2013 08:02:36
+    var day = dayToShortString(utcDay);
+    var month = monthToShortString(utcMonth);
+    var result = day + ' ' + month + ' ' + utcDate + ' ' + utcYear + ' ' 
+               + utcHours + ':' + utcMins + ':' + utcSecs + ':' + utcMillis;
+    return result;
+  }
+
+  var btc = 357.6231//331.0578
+    , originalPrice = 848.975//912.575
     , gox = new MtGox()
     , oneSecondTimer = null
     , originalPosition = (btc * originalPrice)
