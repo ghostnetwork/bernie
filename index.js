@@ -129,17 +129,17 @@ function Drone() {
     var month = monthToShortString(utcMonth);
     var result = day + ' ' 
                + month + ' ' 
-               + padWithZeros(utcDate, 2) + ' ' 
+               + padWithZeros(utcDate.toString(), 2) + ' ' 
                + utcYear + ' ' 
-               + padWithZeros(utcHours, 2) + ':' 
-               + padWithZeros(utcMins, 2) + ':' 
-               + padWithZeros(utcSecs, 2) + ':' 
-               + padWithZeros(utcMillis, 3);
+               + padWithZeros(utcHours.toString(), 2) + ':' 
+               + padWithZeros(utcMins.toString(), 2) + ':' 
+               + padWithZeros(utcSecs.toString(), 2) + ':' 
+               + padWithZeros(utcMillis.toString(), 3);
     return result;
   }
 
   var btc = 433.9229//415.3280//331.0578
-    , originalPrice = $727.00//731.02//917.10
+    , originalPrice = 760.02//731.02//917.10
     , gox = new MtGox()
     , oneSecondTimer = null
     , originalPosition = (btc * originalPrice)
