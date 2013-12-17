@@ -17,4 +17,5 @@ catch(err) {
   process.exit(1);
 }
 
+bernie.init();
 bernie.start();
