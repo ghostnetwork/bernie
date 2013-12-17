@@ -22,16 +22,23 @@ function Bernie(options) {
     config.load()
           .on(Config.Events.didLoad, function() {
             var obj = JSON.parse(config.data);
+            
             var btc = obj['btc'];
             var cash = obj['cash'];
             var originalPrice = obj['originalPrice'];
             var status = obj['status'];
+            var lossThreshold = obj['lossThreshold'];
+            var gainThreshold = obj['gainThreshold'];
+
             var data = {
               btc:btc, 
               cash:cash, 
               originalPrice:originalPrice, 
-              status:status
+              status:status,
+              lossThreshold:lossThreshold,
+              gainThreshold:gainThreshold
             };
+
             that.drone.acceptData(data);
 
             // var newData = {"btc":100, "originalPrice":666};
@@ -59,11 +66,13 @@ function Drone() {
   var that = PubSub.create();
 
   that.acceptData = function(data) {
-    btc = data.btc;
-    cash = data.cash;
-    originalPrice = data.originalPrice;
-    status = data.status;
-    console.log('data: ' + util.inspect(data));
+    _data.btc = data.btc;
+    _data.cash = data.cash;
+    _data.originalPrice = data.originalPrice;
+    _data.status = data.status;
+    _data.lossThreshold = data.lossThreshold;
+    _data.gainThreshold = data.gainThreshold;
+    console.log('_data.: ' + util.inspect(_data));
   };
 
   that.performWork = function(){
@@ -106,40 +115,55 @@ function Drone() {
     var elapsed = now - timestamp;
     
     var originalPosition = 0;
-    if (status === 0) {
-      originalPrice = market.last;
-      originalPosition = cash;
+    if (_data.status === 0) {
+      _data.originalPrice = market.last;
+      originalPosition = _data.cash;
+      _data.btc = originalPosition / _data.originalPrice;
+      _data.status = 1;
+      console.log('-->    originalPrice: ' + _data.originalPrice);
+      console.log('--> originalPosition: ' + originalPosition);
+      console.log('-->              btc: ' + _data.btc);
+      console.log('-->           status: ' + _data.status);
     }
     else {
-      originalPosition = (btc * originalPrice);
+      originalPosition = (_data.btc * _data.originalPrice);
     }
 
-    var position = btc * market.last;
-    var delta = market.last - previousLast;
+    var position = _data.btc * market.last;
+    var deltaLast = market.last - previousLast;
     var positionDelta = position - originalPosition;
     var positionDeltaPercent = (positionDelta / originalPosition) * 100;
 
-    if (delta !== 0) {
+    if (deltaLast !== 0) {
       var dateString = rightNowUTCToString();
       var message = dateString + ' (' + elapsed + 'ms)';
       message += ' : ' + accounting.formatNumber(market.last, 4);
       message += ' [' + accounting.formatNumber(market.volume, 2, '') + ']';
 
       if (existy(previousLast)) {
-        var deltaPercent = (delta / market.last) * 100;
+        var deltaPercent = (deltaLast / market.last) * 100;
         message += '[' + accounting.formatNumber(position, 4, '') + ']';
         if (deltaPercent >= 0) {message += '(+';}
         else {message += '('}
-        message += accounting.formatNumber(deltaPercent, 4) + '%)\t';
+        message += accounting.formatNumber(deltaPercent, 4) + '%)';
+
+        if (positionDeltaPercent <= _data.lossThreshold) {
+          console.log('-------------------------------------------------- LOSS THRESHOLD (' 
+            + positionDeltaPercent + ')');
+        }
+        else if (positionDeltaPercent >= _data.gainThreshold) {
+          console.log('++++++++++++++++++++++++++++++++++++++++++++++++++ GAIN THRESHOLD (' 
+            + positionDeltaPercent + ')');
+        }
       }
       else {
         message += '[' + accounting.formatNumber(position, 4, '') + ']';
         message += '[' + accounting.formatNumber(originalPosition, 4, '') + ']';
       }
-      if (status !== 0) {
-        if (positionDeltaPercent > 0) {message += '\t(+';}
-        else {message += '\t('}
-        message += accounting.formatNumber(positionDeltaPercent, 2) + '%)';
+      if (_data.status !== 0) {
+        if (positionDeltaPercent > 0) {message += '(+';}
+        else {message += '('}
+        message += accounting.formatNumber(positionDeltaPercent, 4) + '%)';
       }
       console.log(message);
     }
@@ -169,10 +193,7 @@ function Drone() {
     return result;
   }
 
-  var btc = 0
-    , originalPrice = 0
-    , status = 0
-    , cash = 0
+  var _data = {}
     , gox = new MtGox()
     , oneSecondTimer = null
     , previousLast = null

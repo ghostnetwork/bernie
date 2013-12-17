@@ -2,5 +2,7 @@
   "btc": 469.1194,
   "cash": 339642.48,
   "originalPrice": 724.00,
-  "status": 0
+  "status": 0,
+  "lossThreshold": -1.5,
+  "gainThreshold": 3.0
 }
