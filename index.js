@@ -77,7 +77,7 @@ function Drone() {
     _data.status = data.status;
     _data.lossThreshold = data.lossThreshold;
     _data.gainThreshold = data.gainThreshold;
-    console.log('_data.: ' + util.inspect(_data));
+    // console.log('_data.: ' + util.inspect(_data));
   };
 
   that.performWork = function(){
@@ -116,6 +116,8 @@ function Drone() {
   function logResult(result, timestamp) {
     var market = result.market;
 
+    if (notExisty(market)) return;
+
     var now = Date.now();
     var elapsed = now - timestamp;
     
@@ -125,10 +127,10 @@ function Drone() {
       originalPosition = _data.cash;
       _data.btc = originalPosition / _data.originalPrice;
       _data.status = 1;
-      console.log('-->    originalPrice: ' + _data.originalPrice);
-      console.log('--> originalPosition: ' + originalPosition);
-      console.log('-->              btc: ' + _data.btc);
-      console.log('-->           status: ' + _data.status);
+      // console.log('-->    originalPrice: ' + _data.originalPrice);
+      // console.log('--> originalPosition: ' + originalPosition);
+      // console.log('-->              btc: ' + _data.btc);
+      // console.log('-->           status: ' + _data.status);
     }
     else {
       originalPosition = (_data.btc * _data.originalPrice);
