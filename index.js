@@ -17,42 +17,47 @@ function Bernie(options) {
   var that = PubSub.create();
 
   Object.defineProperty(that, 'options', {get : function() {return _options;},enumerable : true});
-
-  that.init = function() {
-    config.load()
-          .on(Config.Events.didLoad, function() {
-            var obj = JSON.parse(config.data);
-            
-            var btc = obj['btc'];
-            var cash = obj['cash'];
-            var originalPrice = obj['originalPrice'];
-            var status = obj['status'];
-            var lossThreshold = obj['lossThreshold'];
-            var gainThreshold = obj['gainThreshold'];
-
-            var data = {
-              btc:btc, 
-              cash:cash, 
-              originalPrice:originalPrice, 
-              status:status,
-              lossThreshold:lossThreshold,
-              gainThreshold:gainThreshold
-            };
-
-            that.drone.acceptData(data);
-
-            // var newData = {"btc":100, "originalPrice":666};
-            // var dataJSON = JSON.stringify(newData);
-            // console.log('\n\ndataJSON: ' + util.inspect(dataJSON));
-
-            // config.store(dataJSON);
-          });
-  };
-
-  that.start = function() {gameLoop.start(); return that;};
   that.drone = Drone.create();
 
+  that.drone.on(Drone.Events.LossThreshold, function(data) {
+    console.log('onLossThreshold: ' + data);
+  });
+  that.drone.on(Drone.Events.GainThreshold, function(data) {
+    console.log('onGainThreshold: ' + data);
+  });
+
+  that.init = function() {retrieveConfigData(); return that;};
+  that.start = function() {gameLoop.start(); return that;};
+  that.writeConfigData = function(data){ storeConfigData(data); return that;};
+
   function onGameLoopTick() {that.drone.performWork();};
+
+  function retrieveConfigData() {config.load().on(Config.Events.didLoad, onConfigDataLoad);};
+  function onConfigDataLoad() {
+    var obj = JSON.parse(config.data);
+    var btc = obj['btc'];
+    var cash = obj['cash'];
+    var originalPrice = obj['originalPrice'];
+    var status = obj['status'];
+    var lossThreshold = obj['lossThreshold'];
+    var gainThreshold = obj['gainThreshold'];
+    var data = {
+      btc:btc, 
+      cash:cash, 
+      originalPrice:originalPrice, 
+      status:status,
+      lossThreshold:lossThreshold,
+      gainThreshold:gainThreshold
+    };
+    that.drone.acceptData(data);
+  };
+
+  function storeConfigData(data) {
+    config.on(Config.Events.didStore, function(dataStored) {
+      console.log('storeConfigData: ' + util.inspect(dataStored));
+    });
+    config.store(data);
+  }
 
   var gameLoop = GameLoop.create(onGameLoopTick);
   var _options = options;
@@ -150,10 +155,12 @@ function Drone() {
         if (positionDeltaPercent <= _data.lossThreshold) {
           console.log('-------------------------------------------------- LOSS THRESHOLD (' 
             + positionDeltaPercent + ')');
+          that.publish(Drone.Events.LossThreshold, _data);
         }
         else if (positionDeltaPercent >= _data.gainThreshold) {
           console.log('++++++++++++++++++++++++++++++++++++++++++++++++++ GAIN THRESHOLD (' 
             + positionDeltaPercent + ')');
+          that.publish(Drone.Events.GainThreshold, _data);
         }
       }
       else {
@@ -169,6 +176,7 @@ function Drone() {
     }
   }
 
+  // TODO: Move to verdoux/dateTimeTools.js
   function rightNowUTCToString() {
     var now = new Date();
     var utcDay = now.getUTCDay();
@@ -202,3 +210,7 @@ function Drone() {
   return that;
 }
 Drone.create = function() {return new Drone();};
+Drone.Events = {
+  LossThreshold : 'Loss.Threshold',
+  GainThreshold : 'Gain.Threshold'
+};
