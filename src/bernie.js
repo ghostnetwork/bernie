@@ -19,13 +19,6 @@ function Bernie(options) {
   Object.defineProperty(that, 'options', {get : function() {return _options;},enumerable : true});
   that.drone = Drone.create();
 
-  that.drone.on(Drone.Events.LossThreshold, function(data) {
-    console.log('onLossThreshold: ' + data);
-  });
-  that.drone.on(Drone.Events.GainThreshold, function(data) {
-    console.log('onGainThreshold: ' + data);
-  });
-
   that.init = function() {retrieveConfigData(); return that;};
   that.start = function() {gameLoop.start(); return that;};
   that.writeConfigData = function(data){ storeConfigData(data); return that;};

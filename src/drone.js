@@ -33,6 +33,19 @@ function Drone() {
     }
   };
 
+  that.sell = function(market) {
+    var value = _data.btc / market.ask;
+
+    console.log('sell: market: ' + util.inspect(market));
+    console.log('value (cash): ' + value);
+    _data.cash = value;
+    _data.status = -1;
+    console.log('_data: ' + util.inspect(_data));
+  }
+
+  that.buy = function(market) {
+  }
+
   function onTimerTrigger() {
     if (retrieveMarketDataTask.isReady()) {
       retrieveMarketDataTask.begin();
@@ -73,6 +86,9 @@ function Drone() {
       // console.log('-->              btc: ' + _data.btc);
       // console.log('-->           status: ' + _data.status);
     }
+    else if (_data.status === -1) {
+      console.log('on the sidelines for now: btc: ' + _data.btc + '; cash: ' + _data.cash);
+    }
     else {
       originalPosition = (_data.btc * _data.originalPrice);
     }
@@ -98,12 +114,12 @@ function Drone() {
         if (positionDeltaPercent <= _data.lossThreshold) {
           console.log('-------------------------------------------------- LOSS THRESHOLD (' 
             + positionDeltaPercent + ')');
-          that.publish(Drone.Events.LossThreshold, _data);
+          that.sell(market);
         }
         else if (positionDeltaPercent >= _data.gainThreshold) {
           console.log('++++++++++++++++++++++++++++++++++++++++++++++++++ GAIN THRESHOLD (' 
             + positionDeltaPercent + ')');
-          that.publish(Drone.Events.GainThreshold, _data);
+          that.sell(market);
         }
       }
       else {
@@ -128,8 +144,4 @@ function Drone() {
   return that;
 }
 Drone.create = function() {return new Drone();};
-Drone.Events = {
-  LossThreshold : 'Loss.Threshold',
-  GainThreshold : 'Gain.Threshold'
-};
 module.exports = Drone;

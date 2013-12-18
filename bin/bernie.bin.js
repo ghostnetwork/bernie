@@ -3,22 +3,3 @@
 'use strict';
 
 require('../index.js');
-/*
-var Bernie = require('../index');
-var bernie;
-
-
-var options = {
-};
-
-try {
-  bernie = Bernie.create(options);
-}
-catch(err) {
-  console.log(err.stack);
-  process.exit(1);
-}
-
-bernie.init();
-bernie.start();
-*/
