@@ -19,7 +19,6 @@ function Drone() {
     _data.status = data.status;
     _data.lossThreshold = data.lossThreshold;
     _data.gainThreshold = data.gainThreshold;
-    // console.log('_data.: ' + util.inspect(_data));
   };
 
   that.performWork = function(){

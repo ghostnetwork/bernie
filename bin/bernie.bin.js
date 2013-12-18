@@ -2,6 +2,8 @@
 
 'use strict';
 
+require('../index.js');
+/*
 var Bernie = require('../index');
 var bernie;
 
@@ -19,3 +21,4 @@ catch(err) {
 
 bernie.init();
 bernie.start();
+*/
