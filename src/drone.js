@@ -55,15 +55,17 @@ function Drone() {
   };
 
   function onRetrieveMarketDataDone(result) {
-    logResult({market:result.value.market}, result.value.timestamp);
+    result.value.elapsed = Date.now() - result.value.timestamp;
+    result.value.data = _data;
+    // result.value.previousLast = previousLast;
+    PubSub.global.publish(Drone.Events.DidRetrieveMarketData, result.value);
+
+    // logResult({market:result.value.market}, result.value.timestamp);
     retrieveMarketDataTask.markCompleted();
+    // previousLast = currentPrice;
   };
 
   function onMarketCompleted() {retrieveMarketDataTask.reset();};
-
-  that.dispatch = function() {
-    console.log('_data: ' + util.inspect(_data));
-  };
 
   that.calculateMarketChanges = function(market) {
     if (notExisty(market)) return;
@@ -74,7 +76,7 @@ function Drone() {
     gox.market('BTCUSD', function(err, market) {
       if (typeof market != 'undefined') {
         done({market:market, timestamp:timestamp});
-        previousLast = currentPrice;
+        // previousLast = currentPrice;
       }
     });
   };
@@ -187,4 +189,7 @@ function Drone() {
   return that;
 }
 Drone.create = function() {return new Drone();};
+Drone.Events = {
+  DidRetrieveMarketData: 'did.retrieve.market.data'
+};
 module.exports = Drone;

@@ -31,13 +31,17 @@ var accounting = require('accounting')
   , PubSub = require('../lib/verdoux/pubsub.js')
   , Task = require('../lib/koufax/task.js')
   , Config = require('../lib/verdoux/config.js')
-  , Drone = require('../src/drone.js');
+  , Drone = require('../src/drone.js')
+  , Calculate = require('../src/calculate.js')
+  , Report = require('../src/report.js');
 
 function Bernie(options) {
   var that = PubSub.create();
 
   Object.defineProperty(that, 'options', {get : function() {return _options;},enumerable : true});
   that.drone = Drone.create();
+  that.report = Report.create();
+  that.calculate = Calculate.create();
 
   that.init = function() {retrieveConfigData(); return that;};
   that.start = function() {gameLoop.start(); return that;};
