@@ -1,3 +1,23 @@
+
+configDataToObject = function(configData) {
+  var obj = JSON.parse(configData);
+  var btc = obj['btc'];
+  var cash = obj['cash'];
+  var originalPrice = obj['originalPrice'];
+  var status = obj['status'];
+  var lossThreshold = obj['lossThreshold'];
+  var gainThreshold = obj['gainThreshold'];
+  var data = {
+    btc:btc, 
+    cash:cash, 
+    originalPrice:originalPrice, 
+    status:status,
+    lossThreshold:lossThreshold,
+    gainThreshold:gainThreshold
+  };
+  return data;
+}
+
 'use strict';
 
 require('../lib/verdoux/predicates.js');
@@ -27,21 +47,7 @@ function Bernie(options) {
 
   function retrieveConfigData() {config.load().on(Config.Events.didLoad, onConfigDataLoad);};
   function onConfigDataLoad() {
-    var obj = JSON.parse(config.data);
-    var btc = obj['btc'];
-    var cash = obj['cash'];
-    var originalPrice = obj['originalPrice'];
-    var status = obj['status'];
-    var lossThreshold = obj['lossThreshold'];
-    var gainThreshold = obj['gainThreshold'];
-    var data = {
-      btc:btc, 
-      cash:cash, 
-      originalPrice:originalPrice, 
-      status:status,
-      lossThreshold:lossThreshold,
-      gainThreshold:gainThreshold
-    };
+    var data = configDataToObject(config.data);
     that.drone.acceptData(data);
   };
 

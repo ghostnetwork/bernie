@@ -1,5 +1,6 @@
 'use strict';
 
+var util = require('util');
 var Bernie = require('./src/bernie.js');
 var bernie;
 
@@ -15,3 +16,4 @@ catch(err) {
   process.exit(1);
 }
 
+module.exports = bernie;

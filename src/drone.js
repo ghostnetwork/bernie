@@ -12,6 +12,8 @@ var accounting = require('accounting')
 function Drone() {
   var that = PubSub.create();
 
+  Object.defineProperty(that, 'data', {get : function() {return _data;},enumerable : true});
+
   that.acceptData = function(data) {
     _data.btc = data.btc;
     _data.cash = data.cash;
@@ -25,7 +27,7 @@ function Drone() {
     if (notExisty(oneSecondTimer))  {
       if (notExisty(retrieveMarketDataTask)) {
         retrieveMarketDataTask = Task.create('market', retrieveMarketData);
-        retrieveMarketDataTask.on(Task.Events.Done, onMarketDone);
+        retrieveMarketDataTask.on(Task.Events.Done, onRetrieveMarketDataDone);
         retrieveMarketDataTask.on(Task.Events.MarkedCompleted, onMarketCompleted);
       }
       oneSecondTimer = setInterval(onTimerTrigger, 10 * 1000);
@@ -52,12 +54,23 @@ function Drone() {
     }
   };
 
-  function onMarketDone(result) {
+  function onRetrieveMarketDataDone(result) {
+
+    console.log('result.value: ' + util.inspect(result.value));
+    
     logResult({market:result.value.market}, result.value.timestamp);
     retrieveMarketDataTask.markCompleted();
   };
 
   function onMarketCompleted() {retrieveMarketDataTask.reset();};
+
+  that.dispatch = function() {
+    console.log('_data: ' + util.inspect(_data));
+  };
+
+  that.calculateMarketChanges = function(market) {
+    if (notExisty(market)) return;
+  };
 
   function retrieveMarketData(done) {
     var timestamp = Date.now();

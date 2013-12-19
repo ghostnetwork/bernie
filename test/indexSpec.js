@@ -1,17 +1,15 @@
 'use strict';
 
+require('..');
 var assert = require('assert')
   , util = require('util');
-var Bernie = require('..');
 
-var bernie;
 
-bernie = new Bernie();
+describe('index.js', function(){
 
-describe('Bernie', function(){
+  var bernie = module.children[0];
 
   it('should not fail', function(){
-    var clone = Bernie.create();
-    assert(clone !== null);
+    (typeof bernie != 'undefined').should.be.true;
   });
 });
