@@ -55,9 +55,6 @@ function Drone() {
   };
 
   function onRetrieveMarketDataDone(result) {
-
-    console.log('result.value: ' + util.inspect(result.value));
-    
     logResult({market:result.value.market}, result.value.timestamp);
     retrieveMarketDataTask.markCompleted();
   };
@@ -85,8 +82,6 @@ function Drone() {
   function logResult(result, timestamp) {
     var market = result.market;
 
-console.log('market.last: ' + util.inspect(market.last));
-
     if (notExisty(market)) return;
 
     var now = Date.now();
@@ -108,38 +103,35 @@ console.log('market.last: ' + util.inspect(market.last));
       currentPrice = market.last;
     }
     else if (_data.status === -1) {
-      var total = _data.btc * previousLast;
-      console.log('on the sidelines for now:\n' 
-        + '           btc: ' + _data.btc + '\n'
-        + '          cash: ' + _data.cash + '\n'
-        + '  previousLast: '  + previousLast + '\n'
-        + '         total: ' + (_data.cash + total) + '\n'
-        + '  currentPrice: '  + currentPrice + '\n'
-        + '   market.last: ' + market.last);
       currentPrice = market.last;
+      // console.log('on the sidelines for now:\n' 
+      //   + '           btc: ' + _data.btc + '\n'
+      //   + '          cash: ' + accounting.formatNumber(_data.cash, 4) + '\n'
+      //   + '  previousLast: '  + previousLast + '\n'
+      //   + '         total: ' + (_data.cash + total) + '\n'
+      //   + '   market.last: ' + market.last);
     }
     else {
       originalPosition = (_data.btc * _data.originalPrice);
     }
+
+    var dateString = rightNowUTCToString();
+    var message = dateString + ' (' + elapsed + 'ms)';
+    message += ' : ' + accounting.formatNumber(currentPrice, 4);
+    message += ' [' + accounting.formatNumber(market.volume, 2, '') + ']';
 
     var position = _data.btc * currentPrice;
     var deltaLast = currentPrice - previousLast;
     var positionDelta = position - originalPosition;
     var positionDeltaPercent = (positionDelta / originalPosition) * 100;
 
-    console.log('            position: ' + position);
-    console.log('           deltaLast: ' + deltaLast);
-    console.log('        currentPrice: ' + currentPrice);
-    console.log('       originalPrice: ' + _data.originalPrice);
-    console.log('       positionDelta: ' + positionDelta);
-    console.log('positionDeltaPercent: ' + positionDeltaPercent);
-
+    // console.log('            position: ' + position);
+    // console.log('           deltaLast: ' + deltaLast);
+    // console.log('        currentPrice: ' + currentPrice);
+    // console.log('       originalPrice: ' + _data.originalPrice);
+    // console.log('       positionDelta: ' + positionDelta);
+    // console.log('positionDeltaPercent: ' + positionDeltaPercent);
     if (deltaLast !== 0) {
-      var dateString = rightNowUTCToString();
-      var message = dateString + ' (' + elapsed + 'ms)';
-      message += ' : ' + accounting.formatNumber(currentPrice, 4);
-      message += ' [' + accounting.formatNumber(market.volume, 2, '') + ']';
-
       if (existy(previousLast)) {
         var deltaPercent = (deltaLast / currentPrice) * 100;
         message += '[' + accounting.formatNumber(position, 4, '') + ']';
@@ -170,9 +162,18 @@ console.log('market.last: ' + util.inspect(market.last));
         if (positionDeltaPercent > 0) {message += '(+';}
         else {message += '('}
         message += accounting.formatNumber(positionDeltaPercent, 4) + '%)';
+        if (_data.status === -1) {
+          message += '*'
+        }
       }
-      console.log(message);
     }
+    else if (_data.status === -1) {
+      var total = _data.btc * previousLast;
+      message += '[' + accounting.formatNumber(total, 4, '') + ']';
+      message += '[B' + accounting.formatNumber(_data.btc, 4, '') + ']*';
+    }
+
+    console.log(message);
   }
 
   var _data = {}
