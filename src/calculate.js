@@ -18,23 +18,12 @@
       var elapsed = result.elapsed;
       var data = result.data;
 
-// console.log('onRetrievedMarketData -------------------------------');
-// console.log('result: ' + util.inspect(result));
-// console.log('market: ' + util.inspect(market));
-// console.log('elapsed: ' + util.inspect(elapsed));
-// console.log('data: ' + util.inspect(data));
-
       if (data.status === 0) {
         result.currentPrice = market.bid;
         data.originalPrice = result.currentPrice;
         result.originalPosition = data.cash;
         data.btc = result.originalPosition / data.originalPrice;
         data.status = 1;
-
-        // console.log('-->    originalPrice: ' + data.originalPrice);
-        // console.log('--> originalPosition: ' + originalPosition);
-        // console.log('-->              btc: ' + data.btc);
-        // console.log('-->           status: ' + data.status);
       }
       else if (data.status === 1) {
         result.currentPrice = market.last;
@@ -43,18 +32,18 @@
       else if (data.status === -1) {
         result.currentPrice = market.last;
         result.originalPosition = data.cash;
-        // console.log('on the sidelines for now:\n' 
-        //   + '           btc: ' + data.btc + '\n'
-        //   + '          cash: ' + accounting.formatNumber(data.cash, 4) + '\n'
-        //   + '  previousLast: '  + previousLast + '\n'
-        //   + '         total: ' + (data.cash + total) + '\n'
-        //   + '   market.last: ' + market.last);
       }
       else {
         result.originalPosition = (data.btc * data.originalPrice);
       }
 
       result.previousLast = previousLast;
+
+      result.position = data.btc * result.currentPrice;
+      result.deltaLast = result.currentPrice - result.previousLast;
+      result.positionDelta = result.position - result.originalPosition;
+      result.positionDeltaPercent = (result.positionDelta / result.originalPosition) * 100;
+
       PubSub.global.publish(Calculate.Events.DidCalculateResults, result);
       previousLast = result.currentPrice;
     }

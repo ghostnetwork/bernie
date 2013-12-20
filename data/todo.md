@@ -34,3 +34,20 @@ bernie - to do
 
     // calculate # of btc; add / subtract
     // x = 580.11 / 
+
+
+
+  /*
+  that.sell = function(market) {
+    var value = _data.btc / market.ask;
+
+    console.log('sell: market: ' + util.inspect(market));
+    console.log('value (cash): ' + value);
+    _data.cash = value;
+    _data.status = -1;
+    console.log('_data: ' + util.inspect(_data));
+  }
+
+  that.buy = function(market) {
+  }
+  */

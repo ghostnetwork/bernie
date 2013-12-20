@@ -35,19 +35,6 @@ function Drone() {
     }
   };
 
-  that.sell = function(market) {
-    var value = _data.btc / market.ask;
-
-    console.log('sell: market: ' + util.inspect(market));
-    console.log('value (cash): ' + value);
-    _data.cash = value;
-    _data.status = -1;
-    console.log('_data: ' + util.inspect(_data));
-  }
-
-  that.buy = function(market) {
-  }
-
   function onTimerTrigger() {
     if (retrieveMarketDataTask.isReady()) {
       retrieveMarketDataTask.begin();
@@ -57,133 +44,25 @@ function Drone() {
   function onRetrieveMarketDataDone(result) {
     result.value.elapsed = Date.now() - result.value.timestamp;
     result.value.data = _data;
-    // result.value.previousLast = previousLast;
     PubSub.global.publish(Drone.Events.DidRetrieveMarketData, result.value);
 
-    // logResult({market:result.value.market}, result.value.timestamp);
     retrieveMarketDataTask.markCompleted();
-    // previousLast = currentPrice;
   };
 
   function onMarketCompleted() {retrieveMarketDataTask.reset();};
-
-  that.calculateMarketChanges = function(market) {
-    if (notExisty(market)) return;
-  };
 
   function retrieveMarketData(done) {
     var timestamp = Date.now();
     gox.market('BTCUSD', function(err, market) {
       if (typeof market != 'undefined') {
         done({market:market, timestamp:timestamp});
-        // previousLast = currentPrice;
       }
     });
   };
 
-  function logResult(result, timestamp) {
-    var market = result.market;
-
-    if (notExisty(market)) return;
-
-    var now = Date.now();
-    var elapsed = now - timestamp;
-    
-    if (_data.status === 0) {
-      currentPrice = market.bid;
-      _data.originalPrice = currentPrice;
-      originalPosition = _data.cash;
-      _data.btc = originalPosition / _data.originalPrice;
-      _data.status = 1;
-
-      // console.log('-->    originalPrice: ' + _data.originalPrice);
-      // console.log('--> originalPosition: ' + originalPosition);
-      // console.log('-->              btc: ' + _data.btc);
-      // console.log('-->           status: ' + _data.status);
-    }
-    else if (_data.status === 1) {
-      currentPrice = market.last;
-    }
-    else if (_data.status === -1) {
-      currentPrice = market.last;
-      // console.log('on the sidelines for now:\n' 
-      //   + '           btc: ' + _data.btc + '\n'
-      //   + '          cash: ' + accounting.formatNumber(_data.cash, 4) + '\n'
-      //   + '  previousLast: '  + previousLast + '\n'
-      //   + '         total: ' + (_data.cash + total) + '\n'
-      //   + '   market.last: ' + market.last);
-    }
-    else {
-      originalPosition = (_data.btc * _data.originalPrice);
-    }
-
-    var dateString = rightNowUTCToString();
-    var message = dateString + ' (' + elapsed + 'ms)';
-    message += ' : ' + accounting.formatNumber(currentPrice, 4);
-    message += ' [' + accounting.formatNumber(market.volume, 2, '') + ']';
-
-    var position = _data.btc * currentPrice;
-    var deltaLast = currentPrice - previousLast;
-    var positionDelta = position - originalPosition;
-    var positionDeltaPercent = (positionDelta / originalPosition) * 100;
-
-    // console.log('            position: ' + position);
-    // console.log('           deltaLast: ' + deltaLast);
-    // console.log('        currentPrice: ' + currentPrice);
-    // console.log('       originalPrice: ' + _data.originalPrice);
-    // console.log('       positionDelta: ' + positionDelta);
-    // console.log('positionDeltaPercent: ' + positionDeltaPercent);
-    if (deltaLast !== 0) {
-      if (existy(previousLast)) {
-        var deltaPercent = (deltaLast / currentPrice) * 100;
-        message += '[' + accounting.formatNumber(position, 4, '') + ']';
-        if (deltaPercent >= 0) {message += '(+';}
-        else {message += '('}
-        message += accounting.formatNumber(deltaPercent, 4) + '%)';
-
-        if (positionDeltaPercent <= _data.lossThreshold) {
-          if (_data.status !== -1) {
-            console.log('-------------------------------------------------- LOSS THRESHOLD (' 
-              + positionDeltaPercent + ')');
-            that.sell(market);
-          }
-        }
-        else if (positionDeltaPercent >= _data.gainThreshold) {
-          if (_data.status !== -1) {
-            console.log('++++++++++++++++++++++++++++++++++++++++++++++++++ GAIN THRESHOLD (' 
-              + positionDeltaPercent + ')');
-            that.sell(market);
-          }
-        }
-      }
-      else {
-        message += '[' + accounting.formatNumber(position, 4, '') + ']';
-        message += '[' + accounting.formatNumber(_data.btc, 4, '') + ']';
-      }
-      if (_data.status !== 0) {
-        if (positionDeltaPercent > 0) {message += '(+';}
-        else {message += '('}
-        message += accounting.formatNumber(positionDeltaPercent, 4) + '%)';
-        if (_data.status === -1) {
-          message += '*'
-        }
-      }
-    }
-    else if (_data.status === -1) {
-      var total = _data.btc * previousLast;
-      message += '[' + accounting.formatNumber(total, 4, '') + ']';
-      message += '[B' + accounting.formatNumber(_data.btc, 4, '') + ']*';
-    }
-
-    console.log(message);
-  }
-
   var _data = {}
     , gox = new MtGox()
     , oneSecondTimer = null
-    , previousLast = null
-    , originalPosition = 0
-    , currentPrice = 0.0
     , retrieveMarketDataTask;
 
   return that;
