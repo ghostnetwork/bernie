@@ -8,12 +8,13 @@
     , _ = require('underscore')
     , util = require('util')
     , PubSub = require('../lib/verdoux/pubsub.js')
-    , Calculate = require('./calculate.js');
+    , ThresholdCheck = require('./thresholdCheck.js');
 
   function Report(){
     var that = PubSub.create();
+
     that.report = function(result) {logResult(result);};
-    PubSub.global.on(Calculate.Events.DidCalculateResults, that.report);
+    PubSub.global.on(ThresholdCheck.Events.DidCheckThreshold, that.report);
     return that;
   };
 
@@ -37,21 +38,6 @@
         if (deltaPercent >= 0) {message += '(+';}
         else {message += '('}
         message += accounting.formatNumber(deltaPercent, 4) + '%)';
-
-        if (result.positionDeltaPercent <= data.lossThreshold) {
-          if (data.status !== -1) {
-            console.log('-------------------------------------------------- LOSS THRESHOLD (' 
-              + result.positionDeltaPercent + ')');
-            // that.sell(market);
-          }
-        }
-        else if (result.positionDeltaPercent >= data.gainThreshold) {
-          if (data.status !== -1) {
-            console.log('++++++++++++++++++++++++++++++++++++++++++++++++++ GAIN THRESHOLD (' 
-              + result.positionDeltaPercent + ')');
-            // that.sell(market);
-          }
-        }
       }
       else {
         message += '[' + accounting.formatNumber(result.position, 4, '') + ']';

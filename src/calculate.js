@@ -17,6 +17,8 @@
       var market = result.market;
       var elapsed = result.elapsed;
       var data = result.data;
+      // var origStatus = data.status;
+      result.originalStatus = data.status;
 
       if (data.status === 0) {
         result.currentPrice = market.bid;

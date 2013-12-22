@@ -33,6 +33,7 @@ var accounting = require('accounting')
   , Config = require('../lib/verdoux/config.js')
   , Drone = require('../src/drone.js')
   , Calculate = require('../src/calculate.js')
+  , ThresholdCheck = require('../src/thresholdCheck.js')
   , Report = require('../src/report.js');
 
 function Bernie(options) {
@@ -40,8 +41,9 @@ function Bernie(options) {
 
   Object.defineProperty(that, 'options', {get : function() {return _options;},enumerable : true});
   that.drone = Drone.create();
-  that.report = Report.create();
   that.calculate = Calculate.create();
+  that.thresholdCheck = ThresholdCheck.create();
+  that.report = Report.create();
 
   that.init = function() {retrieveConfigData(); return that;};
   that.start = function() {gameLoop.start(); return that;};
