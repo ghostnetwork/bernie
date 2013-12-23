@@ -31,10 +31,11 @@ var _ = require('underscore')
   , ElapsedTime = require('../lib/verdoux/elapsedTime.js')
   , GameLoop = require('../lib/verdoux/gameloop.js')
   , PubSub = require('../lib/verdoux/pubsub.js')
-  , ThresholdCheck = require('../src/thresholdCheck.js')
-  , Calculate = require('../src/calculate.js')
-  , MtGoxService = require('../src/mtgoxService.js')
-  , Report = require('../src/report.js');
+  , App = require('./app.js')
+  , Calculate = require('./calculate.js')
+  , MtGoxService = require('./mtgoxService.js')
+  , Report = require('./report.js')
+  , ThresholdCheck = require('./thresholdCheck.js');
 
 function Bernie(options) {
   var that = PubSub.create();
@@ -87,8 +88,12 @@ function Bernie(options) {
     config.on(Config.Events.didStore, function(dataStored) {
       console.log('storeConfigData: ' + util.inspect(dataStored));
     });
-    config.store(data);
+
+    // config.store(data);
+    config.store(JSON.stringify(data));
   };
+
+  PubSub.global.on(App.Events.UpdateConfig, storeConfigData);
 
   var config = Config.create()
     , gameLoop = GameLoop.create(onGameLoopTick)

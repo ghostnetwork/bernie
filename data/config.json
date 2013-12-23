@@ -1,8 +1,1 @@
-{
-  "btc": 1.0,
-  "cash": 1000.00,
-  "originalPrice": 0.00,
-  "status": 0,
-  "lossThreshold": 0.1,
-  "gainThreshold": 0.1
-}
+{"btc":1.5210233798176838,"cash":1018.4785632060277,"originalPrice":"669.59586","status":2,"lossThreshold":-0.1,"gainThreshold":0.2}

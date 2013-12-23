@@ -6,8 +6,7 @@ var accounting = require('accounting')
   , MtGox = require('mtgox')
   , ElapsedTime = require('../lib/verdoux/elapsedTime.js')
   , GameLoop = require('../lib/verdoux/gameloop.js')
-  , PubSub = require('../lib/verdoux/pubsub.js')
-  , Task = require('../lib/koufax/task.js')
+  , PubSub = require('../lib/verdoux/pubsub.js');
 
 function MtGoxService() {
   var that = PubSub.create();
@@ -35,7 +34,7 @@ function MtGoxService() {
     var timestamp = Date.now();
     gox.market('BTCUSD', function(err, market) {
       if (typeof market != 'undefined') {
-        // console.log('========== market: ' + util.inspect(market));
+        // console.log('market ========== \n' + util.inspect(market));
         done({market:market, timestamp:timestamp});
       }
     });

@@ -8,6 +8,7 @@
     , _ = require('underscore')
     , util = require('util')
     , PubSub = require('../lib/verdoux/pubsub.js')
+    , App = require('./app.js')
     , Calculate = require('./calculate.js');
 
   function Report(){
@@ -32,17 +33,13 @@
       if (existy(result.previousLast)) {
         var deltaPercent = (result.deltaLast / result.currentPrice) * 100;
         message += '[' + accounting.formatNumber(result.position, 4, '') + ']';
+        message += '[' + accounting.formatNumber(data.btc, 4, '') + ']';
 
         if (deltaPercent >= 0) {message += '(+';}
         else {message += '('}
         message += accounting.formatNumber(deltaPercent, 4) + '%)';
-      }
-      else {
-        message += '[' + accounting.formatNumber(result.position, 4, '') + ']';
-        message += '[' + accounting.formatNumber(data.btc, 4, '') + ']';
-      }
-      if (existy(result.previousLast)) {
-        if (data.status !== 0) {
+
+        if (data.status !== App.Status.EnteringMarket) {
           if (result.positionDeltaPercent > 0) {message += '(+';}
           else {message += '(';}
 
@@ -52,12 +49,18 @@
           }
         }
       }
+      else {
+        message += '[' + accounting.formatNumber(result.position, 4, '') + ']';
+        message += '[' + accounting.formatNumber(data.btc, 4, '') + ']';
+      }
     }
-    else if (data.status !== 0) {
+    else if (data.status !== App.Status.EnteringMarket) {
       var total = data.btc * result.previousLast;
       message += '[' + accounting.formatNumber(total, 4, '') + ']';
       message += '[' + accounting.formatNumber(data.btc, 4, '') + ']';
     }
+
+    message += ' ' + App.Status.statusToString(data.status);
 
     console.log(message);
   }

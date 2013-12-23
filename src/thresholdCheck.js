@@ -2,9 +2,11 @@
 (function() {
   'use strict';
   
-  var _ = require('underscore');
-  var util = require('util');
-  var PubSub = require('../lib/verdoux/pubsub.js');
+  var _ = require('underscore')
+    , accounting = require('accounting')
+    , util = require('util')
+    , PubSub = require('../lib/verdoux/pubsub.js')
+    , App = require('./app.js');
 
   function ThresholdCheck(){
     var that = PubSub.create();
@@ -12,24 +14,32 @@
     that.performCheck = function(result) {
       var data = result.data;
       
-      if (result.deltaLast !== 0) {
+      // console.log('performCheck:\n' + util.inspect(result));
+
+      if ((data.status === App.Status.InMarket) && (result.deltaLast !== 0)) {
         if (existy(result.previousLast)) {
           if (result.positionDeltaPercent <= data.lossThreshold) {
-            if (data.status !== -1) {
-              console.log('-------------------------------------------------- LOSS THRESHOLD (' 
-                + result.positionDeltaPercent + ')');
-              // that.sell(market);
-            }
+            console.log('LOSS THRESHOLD -------------------------------------------------- (' 
+              + accounting.formatNumber(result.positionDeltaPercent, 4) + ')');
+            result.data.status = App.Status.WaitingAfterLoss;
+            sell(result);
           }
           else if (result.positionDeltaPercent >= data.gainThreshold) {
-            if (data.status !== -1) {
-              console.log('++++++++++++++++++++++++++++++++++++++++++++++++++ GAIN THRESHOLD (' 
-                + result.positionDeltaPercent + ')');
-              // that.sell(market);
-            }
+            console.log('GAIN THRESHOLD ++++++++++++++++++++++++++++++++++++++++++++++++++ (' 
+              + accounting.formatNumber(result.positionDeltaPercent, 4) + ')');
+            result.data.status = App.Status.WaitingAfterGain;
+            sell(result);
           }
         }
       }
+    }
+
+    function sell(result) {
+      result.data.cash = result.position;
+      result.data.originalPrice = result.market.ask;
+
+      console.log('sold:\n' + util.inspect(result.data));
+      PubSub.global.publish(App.Events.UpdateConfig, result.data);
     }
 
     return that;

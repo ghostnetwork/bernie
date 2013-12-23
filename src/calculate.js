@@ -6,6 +6,7 @@
   var _ = require('underscore')
     , util = require('util')
     , PubSub = require('../lib/verdoux/pubsub.js')
+    , App = require('./app.js')
     , MtGoxService = require('./mtgoxService.js');
 
   function Calculate(){
@@ -18,23 +19,25 @@
       var elapsed = result.elapsed;
       var data = result.data;
 
-      if (data.status === 0) {
-        result.currentPrice = market.bid;
-        data.originalPrice = result.currentPrice;
-        result.originalPosition = data.cash;
-        data.btc = result.originalPosition / data.originalPrice;
-        data.status = 1;
-      }
-      else if (data.status === 1) {
-        result.currentPrice = market.last;
-        result.originalPosition = data.cash;
-      }
-      else if (data.status === -1) {
-        result.currentPrice = market.last;
-        result.originalPosition = data.cash;
-      }
-      else {
-        result.originalPosition = (data.btc * data.originalPrice);
+      switch (data.status) {
+        case App.Status.EnteringMarket:
+          result.currentPrice = market.bid;
+          data.originalPrice = result.currentPrice;
+          result.originalPosition = data.cash;
+          data.btc = result.originalPosition / data.originalPrice;
+          data.status = App.Status.InMarket;
+          break;
+
+        case App.Status.InMarket:
+        case App.Status.WaitingAfterLoss:
+        case App.Status.WaitingAfterGain:
+          result.currentPrice = market.last;
+          result.originalPosition = data.cash;
+          break;
+
+        default:
+          result.originalPosition = (data.btc * data.originalPrice);
+          break;
       }
 
       result.previousLast = previousLast;
