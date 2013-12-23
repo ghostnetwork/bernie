@@ -7,14 +7,18 @@ configDataToObject = function(configData) {
   var status = obj['status'];
   var lossThreshold = obj['lossThreshold'];
   var gainThreshold = obj['gainThreshold'];
+  var enterAfterWaitingThreshold = obj['enterAfterWaitingThreshold'];
   var data = {
     btc:btc, 
     cash:cash, 
     originalPrice:originalPrice, 
     status:status,
     lossThreshold:lossThreshold,
-    gainThreshold:gainThreshold
+    gainThreshold:gainThreshold,
+    enterAfterWaitingThreshold:enterAfterWaitingThreshold
   };
+  // console.log('configDataToObject: data: ' + util.inspect(data));
+  
   return data;
 }
 
@@ -81,12 +85,13 @@ function Bernie(options) {
   function retrieveConfigData() {config.load().on(Config.Events.didLoad, onConfigDataLoad);};
   function onConfigDataLoad() {
     var data = configDataToObject(config.data);
+    data.status = App.Status.EnteringMarket;
     that.mtgoxService.acceptData(data);
   };
 
   function storeConfigData(data) {
     config.on(Config.Events.didStore, function(dataStored) {
-      console.log('storeConfigData: ' + util.inspect(dataStored));
+      // console.log('storeConfigData: ' + util.inspect(dataStored));
     });
 
     // config.store(data);

@@ -1,15 +1,17 @@
 bernie - to do
 ==============
 
-* Threshold crossings:
-  * Update _data
-  * Write _data to config file
+* Twitter
+  * Tweet:
+    * Entry (and re-entry) into market
+    * Threshold crossings / sells
 
 * Bernie accepts commands!
-  * Set up http server
+  * Use Twitter
+    * 
+  * Alternative:
+    * Set up http server
   * Commands:
-    * BUY
-    * SELL
     * ?
 
 {

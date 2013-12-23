@@ -21,17 +21,18 @@
 
       switch (data.status) {
         case App.Status.EnteringMarket:
-          result.currentPrice = market.bid;
-          data.originalPrice = result.currentPrice;
+          result.currentPrice = market.ask;
+          data.originalPrice = market.bid;//result.currentPrice;
           result.originalPosition = data.cash;
           data.btc = result.originalPosition / data.originalPrice;
           data.status = App.Status.InMarket;
           break;
 
         case App.Status.InMarket:
-        case App.Status.WaitingAfterLoss:
-        case App.Status.WaitingAfterGain:
-          result.currentPrice = market.last;
+        case App.Status.Waiting:
+        case App.Status.Waiting:
+          // result.currentPrice = market.last;
+          result.currentPrice = market.ask;
           result.originalPosition = data.cash;
           break;
 
@@ -42,8 +43,9 @@
 
       result.previousLast = previousLast;
 
-      result.position = data.btc * result.currentPrice;
       result.deltaLast = result.currentPrice - result.previousLast;
+      result.deltaPercent = (result.deltaLast / result.currentPrice) * 100;
+      result.position = data.btc * result.currentPrice;
       result.positionDelta = result.position - result.originalPosition;
       result.positionDeltaPercent = (result.positionDelta / result.originalPosition) * 100;
 

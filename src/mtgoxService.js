@@ -20,6 +20,8 @@ function MtGoxService() {
     _data.status = data.status;
     _data.lossThreshold = data.lossThreshold;
     _data.gainThreshold = data.gainThreshold;
+    _data.enterAfterWaitingThreshold = data.enterAfterWaitingThreshold;
+    // console.log('_data: ' + util.inspect(_data));
   };
 
   that.performWork = function(completion){
