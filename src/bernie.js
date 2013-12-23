@@ -29,9 +29,8 @@ var accounting = require('accounting')
   , ElapsedTime = require('../lib/verdoux/elapsedTime.js')
   , GameLoop = require('../lib/verdoux/gameloop.js')
   , PubSub = require('../lib/verdoux/pubsub.js')
-  , Task = require('../lib/koufax/task.js')
   , Config = require('../lib/verdoux/config.js')
-  , Drone = require('../src/drone.js')
+  , MtGoxService = require('../src/mtgoxService.js')
   , Calculate = require('../src/calculate.js')
   , Report = require('../src/report.js');
 
@@ -39,7 +38,7 @@ function Bernie(options) {
   var that = PubSub.create();
 
   Object.defineProperty(that, 'options', {get : function() {return _options;},enumerable : true});
-  that.drone = Drone.create();
+  that.mtgoxService = MtGoxService.create();
   that.report = Report.create();
   that.calculate = Calculate.create();
 
@@ -47,12 +46,12 @@ function Bernie(options) {
   that.start = function() {gameLoop.start(); return that;};
   that.writeConfigData = function(data){ storeConfigData(data); return that;};
 
-  function onGameLoopTick() {that.drone.performWork();};
+  function onGameLoopTick() {that.mtgoxService.performWork();};
 
   function retrieveConfigData() {config.load().on(Config.Events.didLoad, onConfigDataLoad);};
   function onConfigDataLoad() {
     var data = configDataToObject(config.data);
-    that.drone.acceptData(data);
+    that.mtgoxService.acceptData(data);
   };
 
   function storeConfigData(data) {

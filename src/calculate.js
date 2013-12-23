@@ -6,12 +6,12 @@
   var _ = require('underscore')
     , util = require('util')
     , PubSub = require('../lib/verdoux/pubsub.js')
-    , Drone = require('./drone.js');
+    , MtGoxService = require('./mtgoxService.js');
 
   function Calculate(){
     var that = PubSub.create();
     
-    PubSub.global.on(Drone.Events.DidRetrieveMarketData, onRetrievedMarketData);
+    PubSub.global.on(MtGoxService.Events.DidRetrieveMarketData, onRetrievedMarketData);
 
     function onRetrievedMarketData(result) {
       var market = result.market;

@@ -9,7 +9,7 @@ var accounting = require('accounting')
   , PubSub = require('../lib/verdoux/pubsub.js')
   , Task = require('../lib/koufax/task.js')
 
-function Drone() {
+function MtGoxService() {
   var that = PubSub.create();
 
   Object.defineProperty(that, 'data', {get : function() {return _data;},enumerable : true});
@@ -44,7 +44,7 @@ function Drone() {
   function onRetrieveMarketDataDone(result) {
     result.value.elapsed = Date.now() - result.value.timestamp;
     result.value.data = _data;
-    PubSub.global.publish(Drone.Events.DidRetrieveMarketData, result.value);
+    PubSub.global.publish(MtGoxService.Events.DidRetrieveMarketData, result.value);
 
     retrieveMarketDataTask.markCompleted();
   };
@@ -67,8 +67,8 @@ function Drone() {
 
   return that;
 }
-Drone.create = function() {return new Drone();};
-Drone.Events = {
+MtGoxService.create = function() {return new MtGoxService();};
+MtGoxService.Events = {
   DidRetrieveMarketData: 'did.retrieve.market.data'
 };
-module.exports = Drone;
+module.exports = MtGoxService;
