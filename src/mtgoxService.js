@@ -23,52 +23,28 @@ function MtGoxService() {
     _data.gainThreshold = data.gainThreshold;
   };
 
-  that.performWork = function(){
-    if (notExisty(oneSecondTimer))  {
-      if (notExisty(retrieveMarketDataTask)) {
-        retrieveMarketDataTask = Task.create('market', retrieveMarketData);
-        retrieveMarketDataTask.on(Task.Events.Done, onRetrieveMarketDataDone);
-        retrieveMarketDataTask.on(Task.Events.MarkedCompleted, onMarketCompleted);
-      }
-      oneSecondTimer = setInterval(onTimerTrigger, 10 * 1000);
-      onTimerTrigger();
-    }
+  that.performWork = function(completion){
+    retrieveMarketData(function(result) {
+      result.elapsed = Date.now() - result.timestamp;
+      result.data = _data;
+      completion(result);
+    });
   };
-
-  function onTimerTrigger() {
-    if (retrieveMarketDataTask.isReady()) {
-      retrieveMarketDataTask.begin();
-    }
-  };
-
-  function onRetrieveMarketDataDone(result) {
-    result.value.elapsed = Date.now() - result.value.timestamp;
-    result.value.data = _data;
-    PubSub.global.publish(MtGoxService.Events.DidRetrieveMarketData, result.value);
-
-    retrieveMarketDataTask.markCompleted();
-  };
-
-  function onMarketCompleted() {retrieveMarketDataTask.reset();};
 
   function retrieveMarketData(done) {
     var timestamp = Date.now();
     gox.market('BTCUSD', function(err, market) {
       if (typeof market != 'undefined') {
+        // console.log('========== market: ' + util.inspect(market));
         done({market:market, timestamp:timestamp});
       }
     });
   };
 
   var _data = {}
-    , gox = new MtGox()
-    , oneSecondTimer = null
-    , retrieveMarketDataTask;
+    , gox = new MtGox();
 
   return that;
 }
 MtGoxService.create = function() {return new MtGoxService();};
-MtGoxService.Events = {
-  DidRetrieveMarketData: 'did.retrieve.market.data'
-};
 module.exports = MtGoxService;

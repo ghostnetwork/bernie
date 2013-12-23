@@ -11,7 +11,7 @@
   function Calculate(){
     var that = PubSub.create();
     
-    PubSub.global.on(MtGoxService.Events.DidRetrieveMarketData, onRetrievedMarketData);
+    that.performCalculations = function(result) {onRetrievedMarketData(result);};
 
     function onRetrievedMarketData(result) {
       var market = result.market;
@@ -44,7 +44,6 @@
       result.positionDelta = result.position - result.originalPosition;
       result.positionDeltaPercent = (result.positionDelta / result.originalPosition) * 100;
 
-      PubSub.global.publish(Calculate.Events.DidCalculateResults, result);
       previousLast = result.currentPrice;
     }
 
@@ -54,8 +53,5 @@
   };
 
   Calculate.create = function() {return new Calculate();};
-  Calculate.Events = {
-    DidCalculateResults: 'did.calculate.results'  // @param: results
-  };
   module.exports = Calculate;
 }).call(this);

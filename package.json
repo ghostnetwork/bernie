@@ -11,6 +11,7 @@
   },
   "dependencies": { 
     "accounting": "0.3.2",
+    "async": "0.2.9",
     "mtgox": "1.0.1",
     "temporary": "0.0.7",
     "underscore": "1.4.4" 
