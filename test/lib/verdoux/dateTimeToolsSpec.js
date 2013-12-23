@@ -135,7 +135,6 @@ describe('DateTimeTools', function(){
       var result = padWithZeros(text, length);
       existy(result).should.be.true;
       (result.length).should.equal(length);
-      console.log('\nresult: ' + result);
     });
 
     it('should pad the given text with the appropriate number of zero characters', function(){
@@ -144,7 +143,6 @@ describe('DateTimeTools', function(){
       var result = padWithZeros(text, length);
       existy(result).should.be.true;
       (result.length).should.equal(length);
-      console.log('\nresult: ' + result);
     });
   });
 });
