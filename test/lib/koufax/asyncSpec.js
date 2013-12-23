@@ -18,8 +18,8 @@ describe('Async', function(){
   
   describe('serial', function(){
     it('should xxxxx', function(done){
-      var numTasks = 3;
-      async.serial(createTasks(numTasks, done));
+      var myAsync = Async.create(createTasks(3, done));
+      myAsync.serial();
     });
   });
 

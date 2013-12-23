@@ -11,8 +11,13 @@
   function Calculate(){
     var that = PubSub.create();
     
-    PubSub.global.on(MtGoxService.Events.DidRetrieveMarketData, onRetrievedMarketData);
+    // PubSub.global.on(MtGoxService.Events.DidRetrieveMarketData, onRetrievedMarketData);
 
+    that.performCalculations = function(result) {
+      onRetrievedMarketData(result);
+      return that;
+    };
+    
     function onRetrievedMarketData(result) {
       var market = result.market;
       var elapsed = result.elapsed;

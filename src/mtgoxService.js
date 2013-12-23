@@ -24,24 +24,30 @@ function MtGoxService() {
   };
 
   that.performWork = function(){
+    // console.log('performWork');
+
     if (notExisty(oneSecondTimer))  {
       if (notExisty(retrieveMarketDataTask)) {
         retrieveMarketDataTask = Task.create('market', retrieveMarketData);
         retrieveMarketDataTask.on(Task.Events.Done, onRetrieveMarketDataDone);
         retrieveMarketDataTask.on(Task.Events.MarkedCompleted, onMarketCompleted);
       }
-      oneSecondTimer = setInterval(onTimerTrigger, 10 * 1000);
+      oneSecondTimer = setInterval(onTimerTrigger, 1000);
+      // oneSecondTimer = setInterval(onTimerTrigger, 10 * 1000);
       onTimerTrigger();
     }
   };
 
   function onTimerTrigger() {
     if (retrieveMarketDataTask.isReady()) {
+      console.log('retrieveMarketDataTask.isReady');
       retrieveMarketDataTask.begin();
     }
   };
 
   function onRetrieveMarketDataDone(result) {
+    console.log('onRetrieveMarketDataDone: ' + result);
+    
     result.value.elapsed = Date.now() - result.value.timestamp;
     result.value.data = _data;
     PubSub.global.publish(MtGoxService.Events.DidRetrieveMarketData, result.value);
