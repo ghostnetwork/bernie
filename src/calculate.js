@@ -21,11 +21,22 @@
 
       switch (data.status) {
         case App.Status.EnteringMarket:
+          console.log('entering market __________________________________________________');
+          console.log('market:\n' + util.inspect(result));
+
           result.currentPrice = market.ask;
           data.originalPrice = market.bid;//result.currentPrice;
           result.originalPosition = data.cash;
           data.btc = result.originalPosition / data.originalPrice;
           data.status = App.Status.InMarket;
+          
+          console.log('');
+          console.log('    result.currentPrice: ' + result.currentPrice);
+          console.log('     data.originalPrice: ' + data.originalPrice);
+          console.log('result.originalPosition: ' + result.originalPosition);
+          console.log('               data.btc: ' + data.btc);
+          console.log('            data.status: ' + data.status);
+          console.log('');
           break;
 
         case App.Status.InMarket:

@@ -31,7 +31,6 @@
 
     if (result.deltaLast !== 0) {
       if (existy(result.previousLast)) {
-        // var deltaPercent = (result.deltaLast / result.currentPrice) * 100;
         message += '[' + accounting.formatNumber(result.position, 4, '') + ']';
         message += '[' + accounting.formatNumber(data.btc, 4, '') + ']';
 
